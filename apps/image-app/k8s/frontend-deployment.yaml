@@ -2,8 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  labels:
-    app: frontend
+  namespace: dev
 spec:
   replicas: 1
   selector:
@@ -16,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nginx:stable
+          image: orbite82/frontend:latest
           ports:
             - containerPort: 80

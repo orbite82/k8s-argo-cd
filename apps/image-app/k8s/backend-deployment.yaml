@@ -2,8 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  labels:
-    app: backend
+  namespace: dev
 spec:
   replicas: 1
   selector:
@@ -16,7 +15,17 @@ spec:
     spec:
       containers:
         - name: backend
-          image: python:3.11-slim       # imagem pública
-          command: ["python", "-m", "http.server", "5000"]  # mock backend
+          image: orbite82/backend:latest
           ports:
             - containerPort: 5000
+          env:
+            - name: DATABASE_HOST
+              value: postgres
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_USER
+              value: user
+            - name: DATABASE_PASSWORD
+              value: password
+            - name: DATABASE_NAME
+              value: imageapp
