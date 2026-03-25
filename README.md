@@ -235,7 +235,7 @@ k8s-gitops-lab/
  │   └── nginx/
  │       ├── deployment.yaml
  │       ├── service.yaml
- ├── environments/
+ ├── enviroments/
  │   ├── dev/
  │   │   └── app.yaml
  │   └── prod/
@@ -244,8 +244,8 @@ k8s-gitops-lab/
 👉 Aqui está o segredo:
 
 apps/nginx → código da aplicação
-environments/dev → como rodar no DEV
-environments/prod → como rodar no PROD
+enviroments/dev → como rodar no DEV
+enviroments/prod → como rodar no PROD
 
 🚀 ✅ 1. Forma rápida (kubectl — teste/local)
 
@@ -270,7 +270,7 @@ kubectl get svc
 🚀 Passo 3 — aplicar o Application (uma vez só)
 
 ```
-kubectl apply -f environments/dev/app.yaml
+kubectl apply -f enviroments/dev/app.yaml
 ```
 
 🔍 Verificar no Argo CD
