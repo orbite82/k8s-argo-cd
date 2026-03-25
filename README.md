@@ -354,7 +354,7 @@ Agora faz isso:
 ✏️ altera no GitHub:
 
 ```
-replicas: 3
+replicas: 2
 ```
 
 ```
