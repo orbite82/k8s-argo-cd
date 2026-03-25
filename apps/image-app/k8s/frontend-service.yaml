@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: image-app-frontend
+  name: frontend
   labels:
-    app: image-app-frontend
+    app: frontend
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: frontend
   ports:
-    - name: http
-      port: 80
+    - port: 80
       targetPort: 80
+      nodePort: 30080

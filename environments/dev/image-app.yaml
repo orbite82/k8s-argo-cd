@@ -5,17 +5,16 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
     repoURL: https://github.com/orbite82/k8s-argo-cd.git
     targetRevision: main
-    path: apps/image-app/k8s
-
+    path: apps/image-app/k8s   # <- caminho correto para os manifests
   destination:
     server: https://kubernetes.default.svc
-    namespace: dev
-
+    namespace: dev             # namespace onde os pods serão criados
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true    # cria namespace automaticamente se não existir

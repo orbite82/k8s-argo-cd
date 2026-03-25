@@ -102,3 +102,5 @@ Se tudo deu certo você terá:
 ✔ App sincronizado
 ✔ Pods do frontend/backend/DB rodando
 ✔ Acesso via browser
+
+kubectl create namespace dev
