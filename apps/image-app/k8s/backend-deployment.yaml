@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: 79951d719642/backend:latest
+          image: <seu-usuario-dockerhub>/backend:latest
           ports:
             - containerPort: 5000
           env:
