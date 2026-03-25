@@ -1,11 +1,12 @@
-apiVersion: v1
+;apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pvc      # deve bater com claimName do Deployment
-  namespace: dev          # importante
+  name: postgres-pvc
+  namespace: dev
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
+  storageClassName: standard
