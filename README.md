@@ -176,6 +176,32 @@ usar anti-affinity (nível avançado depois)
 ```
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+🌐 Como acessar o Argo CD via URL
+
+Depois de rodar:
+
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+👉 O acesso é:
+
+https://localhost:8080
+
+⚠️ Importante (HTTPS)
+
+Vai aparecer aviso de segurança no navegador
+👉 Isso é normal (certificado self-signed)
+✔️ No navegador:
+Clique em Avançado
+Depois Continuar para localhost
+
+🔐 Login : admin
+
+Senha:
+```
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
+```
+
+Usuário:
 
 🧱 8. Ajuste IMPORTANTE para ambiente “produção-like”
 👉 Use namespaces separados
@@ -240,8 +266,154 @@ service.yaml
 kubectl get pods
 kubectl get svc
 ```
+
 🚀 Passo 3 — aplicar o Application (uma vez só)
 
 ```
-🚀 Passo 3 — aplicar o Application (uma vez só)
+kubectl apply -f environments/dev/app.yaml
+```
+
+🔍 Verificar no Argo CD
+
+```
+kubectl get applications -n argocd
+```
+Se tudo estiver certo, você vai ver algo como:
+
+```
+nginx-dev   Synced   Healthy
+```
+================================================================
+
+🧠 🎯 Objetivo
+
+Conectar o Argo CD ao seu repo:
+
+👉 https://github.com/orbite82/k8s-argo-cd
+
+🚀 ✅ 1. Forma mais simples (funciona direto)
+
+Se o repo for público, você não precisa autenticação.
+
+👉 Basta ajustar seu app.yaml:
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-dev
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/orbite82/k8s-argo-cd.git
+    targetRevision: main
+    path: apps/nginx
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+⚠️ Atenção importante
+✔️ targetRevision
+
+Confere sua branch:
+
+```
+git branch
+```
+Se for main, ok.
+Se for master, muda no YAML.
+
+🚀 2. Aplicar no cluster
+
+```
+kubectl apply -f enviroments/dev/app.yaml
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
 ```

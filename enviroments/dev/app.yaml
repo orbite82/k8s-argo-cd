@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: git://SEU-IP/k8s-gitops-lab.git
+    repoURL: https://github.com/orbite82/k8s-argo-cd.git
     targetRevision: master
     path: apps/nginx
 
