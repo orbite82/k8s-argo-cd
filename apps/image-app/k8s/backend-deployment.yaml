@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: sua-imagem-backend
+        image: image-app-backend:latest
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - mountPath: /data/images
           name: image-storage

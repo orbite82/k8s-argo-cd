@@ -712,6 +712,211 @@ Você precisa criar o Application do image-app
 Crie:
 
 ```
+environments/dev/image-app.yaml
+```
+🧾 Conteúdo
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: image-app
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/orbite82/k8s-argo-cd.git
+    targetRevision: main
+    path: apps/image-app/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+🚀 2. Aplicar (única vez)
+
+```
+kubectl apply -f environments/dev/image-app.yaml
+```
+👉 Isso registra o app no Argo CD
+
+🔍 3. Verificar
+
+```
+kubectl get applications -n argocd
+```
+Agora deve aparecer:
+
+```
+nginx-dev
+image-app
+```
+🔁 4. Depois disso (GitOps normal)
+
+Agora sim:
+```
+git add .
+git commit -m "update image app"
+git push
+```
+👉 Argo CD passa a monitorar automaticamente
+
+=================================================================================================
+# PASOSO 4
+
+❌ 💥 Problema
+Back-off pulling image "sua-imagem-backend"
+pull access denied, repository does not exist
+
+👉 Tradução:
+
+O Kubernetes está tentando baixar:
+
+sua-imagem-backend
+
+👉 Mas essa imagem não existe no Docker Hub
+👉 Ou não está acessível
+
+🧠 🎯 Por que aconteceu?
+
+No seu YAML você deixou algo assim:
+
+image: sua-imagem-backend
+
+👉 Isso era só um placeholder (exemplo)
+
+🟢 OPÇÃO 2 (RECOMENDADO — KIND LOCAL)
+
+Como você usa Kind, o melhor é:
+
+👉 Buildar a imagem local e carregar no cluster
+
+🔧 1. Criar Dockerfile
+
+📄 apps/image-app/backend/Dockerfile
+
+```
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY main.py .
+
+RUN pip install fastapi uvicorn
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Adiciona no seu shell:
+
+```
+echo 'export DOCKER_BUILDKIT=1' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Se usar zsh:
+
+```
+echo 'export DOCKER_BUILDKIT=1' >> ~/.zshrc
+source ~/.zshrc
+```
+
+✔ Dentro da pasta
+
+```
+cd apps/image-app/backend
+docker build -t image-app-backend:latest .
+```
+
+✔ Fora da pasta (raiz do projeto)
+
+```
+docker build -t image-app-backend:latest apps/image-app/backend
+```
+🔨 2. Build da imagem
+
+```
+docker build -t image-app-backend:latest apps/image-app/backend
+```
+📦 3. Carregar no Kind
+
+```
+kind get clusters
+kubectl get nodes --context kind-<nome-do-cluster>
+kind load docker-image image-app-backend:latest --name k8s-ia
+```
+
+🧾 4. Ajustar YAML
+
+No backend-deployment.yaml:
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
 ```
 
 ```
