@@ -389,18 +389,32 @@ Deploy via Argo CD
 
 Adicione isso no seu repo:
 
-```
-apps/
- ├── nginx/
- └── image-app/
-     ├── frontend/
-     ├── backend/
-     ├── k8s/
-         ├── frontend-deployment.yaml
-         ├── backend-deployment.yaml
-         ├── postgres.yaml
-         ├── pvc.yaml
-         ├── ingress.yaml
+```k8s-argo-cd/
+├── apps
+│   ├── image-app
+│   │   ├── backend
+│   │   │   ├── main.py
+│   │   │   └── Dockerfile
+│   │   ├── frontend
+│   │   │   ├── index.html
+│   │   │   └── Dockerfile
+│   │   └── k8s
+│   │       ├── backend-deployment.yaml
+│   │       ├── frontend-deployment.yaml   ✅
+│   │       ├── frontend-service.yaml      ✅
+│   │       ├── ingress.yaml               ✅
+│   │       ├── postgres.yaml
+│   │       └── pvc.yaml
+│   └── nginx
+│       ├── deployment.yaml
+│       └── service.yaml
+├── environments   ✅
+│   ├── dev
+│   │   ├── nginx.yaml
+│   │   └── image-app.yaml   ✅
+│   └── prod
+│       └── image-app.yaml
+
 ```
 🐍 🧠 Backend (Python com FastAPI)
 
@@ -550,6 +564,79 @@ spec:
         persistentVolumeClaim:
           claimName: image-pvc
 ```
+
+🌐 📦 1. frontend-deployment.yaml
+
+📄 apps/image-app/k8s/frontend-deployment.yaml
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-app-frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "256Mi"
+
+        volumeMounts:
+        - name: frontend-content
+          mountPath: /usr/share/nginx/html
+
+      volumes:
+      - name: frontend-content
+        configMap:
+          name: frontend-config
+```
+
+🌍 📦 2. ingress.yaml (para acesso via navegador)
+
+📄 apps/image-app/k8s/ingress.yaml
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: image-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: image.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: image-app-frontend
+            port:
+              number: 80
+```
+
 🌐 Service + acesso local
 
 Para simplificar no seu lab:
