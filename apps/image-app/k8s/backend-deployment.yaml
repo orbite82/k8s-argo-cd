@@ -17,7 +17,7 @@ spec:
         - name: backend
           image: 79951d719642/backend:latest
           ports:
-            - containerPort: 5000
+            - containerPort: 80
           env:
             - name: DATABASE_HOST
               value: postgres
