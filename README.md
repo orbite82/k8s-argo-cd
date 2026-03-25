@@ -694,6 +694,22 @@ Depois:
 ```
 sudo nano /etc/hosts
 ```
+=================================================================================================
+# PASSO 3 
+
+⚠️ 🔥 Ponto chave do GitOps
+
+👉 O Argo CD NÃO descobre apps automaticamente no repo
+
+👉 Você precisa registrar cada app com um Application
+
+✅ ✔️ SOLUÇÃO
+
+Você precisa criar o Application do image-app
+
+📄 1. Criar arquivo
+
+Crie:
 
 ```
 ```
