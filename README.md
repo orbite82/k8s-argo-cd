@@ -2,6 +2,8 @@
 <img src="https://user-images.githubusercontent.com/47891196/139104117-aa9c2943-37da-4534-a584-e4e5ff5bf69a.png" width="350px" />
 </div>
 
+# PASSO 1
+
 # k8s-argo-cd
 k8s-argo-cd
 
@@ -355,4 +357,274 @@ Agora faz isso:
 
 ```
 replicas: 2
+```
+
+# PASSO 2
+
+🧠 🎯 O que vamos construir
+
+Uma aplicação com:
+
+Frontend (web) → interface
+Backend (Python) → API
+Banco de dados → metadados das imagens
+Storage → salvar imagens
+Deploy via Argo CD
+
+🏗️ 📐 Arquitetura
+
+```
+[ Browser ]
+     ↓
+[ Frontend (React ou HTML simples) ]
+     ↓
+[ Backend (FastAPI) ]
+     ↓
+[ PostgreSQL ]
+     ↓
+[ Volume (PVC) → imagens salvas ]
+```
+
+📁 Estrutura no seu repo
+
+Adicione isso no seu repo:
+
+```
+apps/
+ ├── nginx/
+ └── image-app/
+     ├── frontend/
+     ├── backend/
+     ├── k8s/
+         ├── frontend-deployment.yaml
+         ├── backend-deployment.yaml
+         ├── postgres.yaml
+         ├── pvc.yaml
+         ├── ingress.yaml
+```
+🐍 🧠 Backend (Python com FastAPI)
+
+Use FastAPI
+
+📄 backend/main.py
+
+
+```
+from fastapi import FastAPI, UploadFile, File
+from fastapi.staticfiles import StaticFiles
+import shutil
+import os
+
+app = FastAPI()
+
+UPLOAD_DIR = "/data/images"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.post("/upload")
+async def upload_image(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename}
+
+@app.get("/images")
+def list_images():
+    return os.listdir(UPLOAD_DIR)
+
+app.mount("/images", StaticFiles(directory=UPLOAD_DIR), name="images")
+```
+🌐 Frontend simples (HTML + JS)
+📄 frontend/index.html
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image App</title>
+</head>
+<body>
+  <h1>Upload de Imagem</h1>
+
+  <input type="file" id="fileInput">
+  <button onclick="upload()">Upload</button>
+
+  <h2>Galeria</h2>
+  <div id="gallery"></div>
+
+  <script>
+    async function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      loadImages();
+    }
+
+    async function loadImages() {
+      const res = await fetch("/api/images");
+      const images = await res.json();
+
+      const gallery = document.getElementById("gallery");
+      gallery.innerHTML = "";
+
+      images.forEach(img => {
+        const el = document.createElement("img");
+        el.src = "/api/images/" + img;
+        el.style.width = "200px";
+        el.onclick = () => {
+          document.body.style.backgroundImage = `url(${el.src})`;
+        };
+        gallery.appendChild(el);
+      });
+    }
+
+    loadImages();
+  </script>
+</body>
+</html>
+```
+💾 Persistência (PVC)
+📄 pvc.yaml
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+🐘 Banco (PostgreSQL simples)
+📄 postgres.yaml
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+spec:
+  containers:
+  - name: postgres
+    image: postgres:15
+    env:
+    - name: POSTGRES_PASSWORD
+      value: "postgres"
+```
+
+⚙️ Backend Deployment
+📄 backend-deployment.yaml
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: sua-imagem-backend
+        volumeMounts:
+        - mountPath: /data/images
+          name: image-storage
+      volumes:
+      - name: image-storage
+        persistentVolumeClaim:
+          claimName: image-pvc
+```
+🌐 Service + acesso local
+
+Para simplificar no seu lab:
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+```
+🌍 Melhor opção (recomendado)
+
+👉 Use Ingress (produção-like)
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: image-app
+spec:
+  rules:
+  - host: image.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+```
+🧠 Configurar domínio local
+
+No seu /etc/hosts:
+```
+docker ps --format "table {{.Names}}"
+NAMES
+k8s-ia-control-plane
+k8s-ia-worker2
+k8s-ia-worker
+
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' k8s-ia-control-plane
+172.18.0.4
+```
+Depois:
+
+```
+sudo nano /etc/hosts
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
+```
+
+```
 ```
