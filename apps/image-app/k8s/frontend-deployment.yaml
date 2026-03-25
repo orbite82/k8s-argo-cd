@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: orbite82/frontend:latest
+          image: nginx:alpine
           ports:
             - containerPort: 80

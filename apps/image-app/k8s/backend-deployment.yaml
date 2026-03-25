@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: orbite82/backend:latest
+          image: python:3.11-slim
           ports:
             - containerPort: 5000
           env:
