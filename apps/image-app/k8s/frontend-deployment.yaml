@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nginx:alpine
+          image: 79951d719642/frontend:latest
           ports:
             - containerPort: 80
