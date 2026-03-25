@@ -336,11 +336,25 @@ Se for master, muda no YAML.
 ```
 kubectl apply -f enviroments/dev/app.yaml
 ```
+🔍 3. Verificar
 
 ```
+kubectl get applications -n argocd
 ```
+🌐 4. Ver no browser
+
+👉 acessar:
+
+https://localhost:8080
+
+🔥 5. Teste REAL de GitOps
+
+Agora faz isso:
+
+✏️ altera no GitHub:
 
 ```
+replicas: 3
 ```
 
 ```
