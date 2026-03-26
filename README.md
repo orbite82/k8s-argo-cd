@@ -2346,6 +2346,23 @@ bash
 git add .
 git commit -m "Alteração index.html para ambiente PROD"
 git push origin prod
+
+✅ Assim você consegue validar que o Argo CD está sincronizando corretamente cada branch com seu respectivo namespace.
+
+📌 Como resolver
+Opção 1 – Commitar antes de trocar
+Se você quer manter as alterações:
+
+bash
+git add README.md
+git commit -m "Atualização README em prod"
+git checkout main
+Depois você pode fazer o merge normalmente:
+
+bash
+git merge prod
+git push origin main
+
 ```
 ```
 
