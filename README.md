@@ -631,6 +631,155 @@ Se usar ClusterIP, precisa do ingress + /etc/hosts.
 
 Se usar LoadBalancer, precisa do minikube tunnel + /etc/hosts.
 
+
+-------------------------------------------------------------------------------------------------
+
+📌 Passo 3.1 – Configuração do Argo CD com Cluster e GitHub
+
+4. Criar o manifesto de aplicação do Argo CD
+No arquivo argocd/hml-prod-apps.yaml:
+
+yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-hml
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: main
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: main
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+=================================================================================================
+
+📌 Estrutura recomendada no GitHub
+No seu repositório https://github.com/orbite82/k8s-argo-cd, crie duas branches:
+
+hml → ambiente de homologação
+
+prod → ambiente de produção
+
+Cada branch terá os mesmos diretórios (cluster/, python-app/, argocd/), mas com configurações específicas se necessário.
+
+📌 Passo a passo para criar branches
+Crie a branch hml a partir da main:
+
+bash
+git checkout main
+git checkout -b hml
+git push origin hml
+Crie a branch prod:
+
+bash
+git checkout main
+git checkout -b prod
+git push origin prod
+Agora você terá três branches no GitHub: main, hml, prod.
+
+
+📌 Ajuste do manifesto Argo CD
+No arquivo argocd/hml-prod-apps.yaml, configure cada aplicação para apontar para o branch correto:
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-hml
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: main
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: prod
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: prod   # <<<<< branch PROD
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+Aplique:
+
+bash
+kubectl apply -f argocd/prod-apps.yaml
+
+
+📌 Fluxo de trabalho com branches
+Homologação (HML)  
+Você faz commits e push na branch hml. O Argo CD sincroniza automaticamente no namespace hml.
+
+Produção (PROD)  
+Quando a versão estiver validada, você faz merge da hml para prod. O Argo CD sincroniza no namespace prod.
 ```
 ```
 
