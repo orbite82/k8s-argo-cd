@@ -2363,6 +2363,21 @@ bash
 git merge prod
 git push origin main
 
+📌 Fluxo recomendado para GitOps com Argo CD
+Trabalhe em hml → teste alterações.
+
+Quando estiver validado, faça merge para prod.
+
+Depois, se quiser manter main como branch “base”, faça merge de prod para main.
+
+Assim o Argo CD entende:
+
+hml → sincroniza no namespace hml.
+
+prod → sincroniza no namespace prod.
+
+main → pode ser usado como branch de referência ou para testes adicionais (se você criar uma Application apontando para main).
+
 ```
 ```
 
