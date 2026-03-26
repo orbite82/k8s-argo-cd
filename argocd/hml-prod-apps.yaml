@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-hml
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: main
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: hml
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: python-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/orbite82/k8s-argo-cd.git'
+    targetRevision: hml  # <<<<< branch HML
+    path: python-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: hml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
