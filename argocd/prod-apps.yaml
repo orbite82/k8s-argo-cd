@@ -11,7 +11,7 @@ spec:
     path: python-app
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: hml
+    namespace: prod
   syncPolicy:
     automated:
       prune: true
