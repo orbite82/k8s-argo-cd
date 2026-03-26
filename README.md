@@ -485,6 +485,152 @@ Comandos úteis (kubectl get pods, kubectl logs, etc.).
 ```
 👉 Sugestão: no seu repositório GitHub (https://github.com/orbite82/k8s-argo-cd), crie branches separados para hml e prod, e vincule-os ao Argo CD. Assim você terá um fluxo GitOps real.
 
+📌 Passo a Passo – Aplicação Python
+1. Build da imagem Docker
+Dentro da pasta python-app/:
+
+bash
+# Entre na pasta
+cd python-app
+
+# Build da imagem
+docker build -t python-app:latest .
+Isso cria a imagem python-app:latest usando o Dockerfile.
+
+2. Carregar a imagem no Minikube
+Como o Minikube roda em um ambiente isolado, você precisa carregar a imagem nele:
+
+bash
+minikube image load python-app:latest
+3. Aplicar os manifests no Kubernetes
+Agora vamos aplicar os YAMLs da aplicação:
+
+bash
+kubectl apply -f deployment.yaml -n hml
+kubectl apply -f service.yaml -n hml
+kubectl apply -f ingress.yaml -n hml
+Aqui estamos usando o namespace hml. Se quiser rodar em prod, basta trocar -n prod.
+
+4. Verificar se os pods estão rodando
+bash
+kubectl get pods -n hml
+Você deve ver algo como:
+
+Código
+python-app-xxxx   Running
+5. Verificar o service
+bash
+kubectl get svc -n hml
+6. Ingress e acesso via URL
+Confirme que o ingress controller (NGINX) está rodando:
+
+bash
+kubectl get pods -n ingress-nginx
+Adicione no seu /etc/hosts:
+
+Código
+127.0.0.1 app.local
+Acesse no navegador:
+
+Código
+http://app.local
+
+-------------------------------------------------------------------------------------------------
+
+# Em caso de Erro para acessar app.local
+
+🔧 Passo a Passo para acessar a aplicação via URL
+1. Verifique se o Ingress Controller está instalado
+Se você não instalou o NGINX ingress controller, rode:
+
+bash
+minikube addons enable ingress
+Isso cria os pods do NGINX ingress controller no namespace ingress-nginx.
+
+2. Confirme que os pods do ingress estão rodando
+bash
+kubectl get pods -n ingress-nginx
+Você deve ver algo como:
+
+Código
+nginx-ingress-controller-xxxx   Running
+
+3. Descubra o IP do Minikube
+bash
+minikube ip
+Exemplo de saída:
+
+Código
+192.168.49.2
+Esse é o IP que o ingress vai usar.
+
+4. Configure o /etc/hosts
+Edite o arquivo /etc/hosts e adicione:
+
+Código
+192.168.49.2 app.local
+192.168.49.2 argocd.local
+Substitua 192.168.49.2 pelo IP que você obteve no comando minikube ip.
+
+5. Teste o acesso
+Agora abra no navegador:
+
+Código
+http://app.local
+Se o ingress e o service estiverem corretos, você verá sua aplicação Flask.
+
+🔧 Como corrigir
+1. Alterar o Service da aplicação para LoadBalancer
+Edite o arquivo python-app/service.yaml e troque o tipo:
+
+yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-app-service
+  namespace: hml
+spec:
+  selector:
+    app: python-app
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: LoadBalancer   # <<<<< altere aqui
+Depois aplique novamente:
+
+bash
+kubectl apply -f python-app/service.yaml -n hml
+2. Verifique se o túnel reconhece o serviço
+Com o minikube tunnel rodando em um terminal, abra outro e rode:
+
+bash
+kubectl get svc -n hml
+Agora você deve ver algo como:
+
+Código
+python-app-service   LoadBalancer   10.96.x.x   192.168.58.2   5000:xxxxx/TCP   2m
+Note que aparece um EXTERNAL-IP (192.168.58.2).
+
+3. Ajuste o /etc/hosts
+Adicione:
+
+Código
+192.168.58.2 app.local
+4. Teste no navegador
+Abra:
+
+Código
+http://app.local
+✅ Alternativa sem LoadBalancer
+Se preferir manter o Service como ClusterIP, você pode acessar via ingress normalmente, mas precisa garantir que o ingress controller está resolvendo o host app.local para o IP do Minikube. Nesse caso, o passo crítico é mapear o IP do Minikube no /etc/hosts.
+
+👉 Resumindo:
+
+Se usar ClusterIP, precisa do ingress + /etc/hosts.
+
+Se usar LoadBalancer, precisa do minikube tunnel + /etc/hosts.
+
 ```
 ```
 
