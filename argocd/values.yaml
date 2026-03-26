@@ -1,0 +1,15 @@
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - argocd.local
+    paths:
+      - /
+    tls: []
+  service:
+    type: ClusterIP
+
+configs:
+  params:
+    server.insecure: true   # Permite acesso sem TLS interno (útil em Minikube)
